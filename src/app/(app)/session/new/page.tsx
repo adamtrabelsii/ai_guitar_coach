@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { Upload, Square, Pause, Trash2, ArrowLeft } from "lucide-react"
+import { analyzeAudio } from "@/lib/audio-analysis"
 import type { AudioMetrics } from "@/types"
 
 type Phase = "idle" | "recording" | "review" | "analyzing"
@@ -120,13 +121,7 @@ export default function NewSessionPage() {
         .from("audio-clips")
         .getPublicUrl(filename)
 
-      const metrics: AudioMetrics = {
-        averagePitch: 0,
-        pitchStability: 0,
-        estimatedBPM: 0,
-        dynamicRange: 0,
-        duration,
-      }
+      const metrics: AudioMetrics = await analyzeAudio(audioBlob)
 
       const res = await fetch("/api/analyze", {
         method: "POST",

@@ -12,28 +12,62 @@ export async function POST(req: NextRequest) {
       title: string
     }
 
-    const prompt = `You are an expert guitar coach analyzing a student's playing session.
+    const hasPitch = metrics.averagePitch > 0
+    const hasBPM = metrics.estimatedBPM > 0
+    const hasStability = metrics.pitchStability > 0
 
-Audio session metrics:
-- Duration: ${metrics.duration} seconds
-- Estimated BPM: ${metrics.estimatedBPM > 0 ? metrics.estimatedBPM : "not detected"}
-- Pitch Stability Score: ${metrics.pitchStability > 0 ? `${metrics.pitchStability}/100` : "not detected"}
-- Average Pitch: ${metrics.averagePitch > 0 ? `${metrics.averagePitch.toFixed(1)} Hz` : "not detected"}
-- Dynamic Range: ${metrics.dynamicRange > 0 ? metrics.dynamicRange : "not detected"}
+    const metricsDescription = [
+      `- Session duration: ${metrics.duration} seconds`,
+      hasBPM
+        ? `- Estimated tempo: ${metrics.estimatedBPM} BPM`
+        : `- Tempo: could not be detected (possibly ambient noise or very slow playing)`,
+      hasStability
+        ? `- Pitch stability score: ${metrics.pitchStability}/100 (${
+            metrics.pitchStability >= 80
+              ? "very consistent intonation"
+              : metrics.pitchStability >= 60
+              ? "moderate pitch consistency"
+              : "noticeable pitch inconsistency — intonation needs work"
+          })`
+        : `- Pitch stability: not detected`,
+      hasPitch
+        ? `- Average detected pitch: ${metrics.averagePitch.toFixed(1)} Hz (${
+            metrics.averagePitch < 200
+              ? "low register, likely bass strings"
+              : metrics.averagePitch < 500
+              ? "mid register"
+              : "high register / lead playing"
+          })`
+        : `- Pitch: no clear notes detected`,
+      metrics.dynamicRange > 0
+        ? `- Dynamic range score: ${metrics.dynamicRange}/100 (${
+            metrics.dynamicRange >= 60
+              ? "good variation between soft and loud"
+              : "fairly uniform volume — try varying dynamics"
+          })`
+        : `- Dynamics: not measured`,
+    ].join("\n")
 
-The student is a guitarist. Based on the available metrics and session duration, provide thoughtful, actionable coaching feedback.
+    const prompt = `You are an experienced guitar coach. A student just recorded a practice session and you are reviewing the audio analysis data. Give specific, encouraging, and actionable feedback based on what the numbers actually reveal.
 
-Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
+${metricsDescription}
+
+Important coaching context:
+- A pitch stability score above 80 means the student has solid intonation
+- BPM around 60–80 suggests careful, deliberate practice; above 140 suggests fast runs or strumming
+- If metrics are mostly undetected, the recording may be very short, very quiet, or mostly percussive
+
+Respond ONLY with valid JSON — no markdown, no extra text:
 {
-  "overallScore": <number 0-100>,
-  "summary": "<2-3 sentence overall assessment>",
-  "strengths": ["<strength 1>", "<strength 2>"],
-  "improvements": ["<area 1>", "<area 2>"],
+  "overallScore": <number 0-100, weighted heavily by pitch stability and whether the session showed real engagement>,
+  "summary": "<2-3 sentences referencing the actual numbers — be specific, not generic>",
+  "strengths": ["<specific strength based on the data>", "<another strength>"],
+  "improvements": ["<specific area to work on, tied to the metrics>", "<another improvement>"],
   "practiceExercises": [
-    { "name": "<exercise name>", "description": "<how to do it>", "duration": "<X minutes>" },
-    { "name": "<exercise name>", "description": "<how to do it>", "duration": "<X minutes>" }
+    { "name": "<exercise name>", "description": "<clear instructions>", "duration": "<X minutes>" },
+    { "name": "<exercise name>", "description": "<clear instructions>", "duration": "<X minutes>" }
   ],
-  "nextSessionFocus": "<one key thing to focus on next time>"
+  "nextSessionFocus": "<one concrete thing to focus on next time, based on the weakest metric>"
 }`
 
     const completion = await groq.chat.completions.create({
