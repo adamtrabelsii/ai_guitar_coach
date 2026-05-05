@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Guitar Coach — Wireframes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f5f3ef;
+      font-family: 'Caveat', cursive;
+      color: #1a1a18;
+      min-height: 100vh;
+    }
+    /* Tab bar */
+    .tab-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: #f5f3ef;
+      border-bottom: 2px solid #1a1a18;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 16px;
+      overflow-x: auto;
+    }
+    .tab-bar-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #888;
+      white-space: nowrap;
+      padding-right: 20px;
+      border-right: 1.5px solid #ccc;
+      margin-right: 4px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      font-family: 'Caveat', cursive;
+      font-size: 17px;
+      font-weight: 600;
+      color: #888;
+      padding: 12px 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s;
+    }
+    .tab-btn:hover { color: #1a1a18; }
+    .tab-btn.active { color: #1a1a18; border-bottom-color: #e8891a; }
+
+    /* Canvas area */
+    .canvas-area {
+      padding-top: 52px;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 40px;
+      padding-bottom: 60px;
+      flex-wrap: wrap;
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+
+    /* Phone frame */
+    .phone-frame {
+      width: 320px;
+      flex-shrink: 0;
+    }
+    .phone-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #aaa;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .phone-body {
+      border: 2.5px solid #1a1a18;
+      border-radius: 32px;
+      background: #fdfcf9;
+      overflow: hidden;
+      position: relative;
+      min-height: 600px;
+    }
+    .phone-notch {
+      height: 28px;
+      background: #1a1a18;
+      border-radius: 0 0 16px 16px;
+      width: 100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .phone-notch-dot { width: 8px; height: 8px; border-radius: 50%; background: #444; }
+
+    /* Sketch primitives */
+    .sk-rect {
+      border: 2px solid #1a1a18;
+      border-radius: 4px;
+      background: transparent;
+    }
+    .sk-rect-fill {
+      border: 2px solid #1a1a18;
+      border-radius: 4px;
+      background: #e8e4dc;
+    }
+    .sk-rect-accent {
+      border: 2px solid #1a1a18;
+      border-radius: 4px;
+      background: #e8891a;
+    }
+    .sk-rect-dark {
+      border: 2px solid #1a1a18;
+      border-radius: 4px;
+      background: #1a1a18;
+    }
+    .sk-circle {
+      border: 2.5px solid #1a1a18;
+      border-radius: 50%;
+      background: transparent;
+    }
+    .sk-label {
+      font-family: 'Caveat', cursive;
+      font-size: 15px;
+      color: #1a1a18;
+      line-height: 1.3;
+    }
+    .sk-label-sm {
+      font-family: 'Caveat', cursive;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.3;
+    }
+    .sk-label-lg {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a18;
+      line-height: 1.2;
+    }
+    .sk-label-xl {
+      font-family: 'Caveat', cursive;
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1a18;
+      line-height: 1.1;
+    }
+    .sk-mono {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: #555;
+    }
+    .sk-divider {
+      border: none;
+      border-top: 1.5px dashed #ccc;
+      margin: 12px 0;
+    }
+    .sk-annotation {
+      font-family: 'Caveat', cursive;
+      font-size: 12px;
+      color: #e8891a;
+      font-style: italic;
+    }
+    .sk-hatch {
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        rgba(0,0,0,0.07) 4px,
+        rgba(0,0,0,0.07) 5px
+      );
+      border: 2px dashed #bbb;
+      border-radius: 4px;
+    }
+
+    /* Screen content wrapper */
+    .screen-content {
+      padding: 14px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 16px 4px;
+    }
+    .status-bar .sk-mono { font-size: 10px; }
+
+    /* Nav bar at bottom */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 8px;
+      border-top: 1.5px solid #ddd;
+      margin-top: 8px;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .nav-icon {
+      width: 22px; height: 22px;
+      border: 2px solid #aaa;
+      border-radius: 4px;
+    }
+    .nav-icon.active {
+      border-color: #e8891a;
+      background: rgba(232,137,26,0.12);
+    }
+    .nav-label { font-size: 11px; color: #aaa; }
+    .nav-label.active { color: #e8891a; font-weight: 700; }
+
+    /* Section header badge */
+    .section-badge {
+      display: inline-block;
+      background: #1a1a18;
+      color: #f5f3ef;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 2px 7px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Canvas section title */
+    .canvas-section-title {
+      width: 100%;
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #aaa;
+      text-transform: uppercase;
+      padding: 28px 0 8px;
+    }
+
+    /* Row grouping */
+    .variant-row {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Waveform placeholder */
+    .waveform-bars {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 40px;
+    }
+    .waveform-bar {
+      flex: 1;
+      background: #1a1a18;
+      border-radius: 1px;
+      opacity: 0.35;
+    }
+
+    /* Score ring */
+    .score-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Chart bars */
+    .chart-bar-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 50px;
+      padding-bottom: 2px;
+    }
+    .chart-bar {
+      flex: 1;
+      background: #e8e4dc;
+      border: 1.5px solid #1a1a18;
+      border-radius: 2px 2px 0 0;
+    }
+    .chart-bar.highlight {
+      background: #e8891a;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Tab navigation -->
+<div class="tab-bar">
+  <div class="tab-bar-title">AI GUITAR COACH</div>
+  <button class="tab-btn active" onclick="showPage('landing')">Landing</button>
+  <button class="tab-btn" onclick="showPage('auth')">Auth</button>
+  <button class="tab-btn" onclick="showPage('dashboard')">Dashboard</button>
+  <button class="tab-btn" onclick="showPage('session-new')">New Session</button>
+  <button class="tab-btn" onclick="showPage('session-detail')">Feedback</button>
+  <button class="tab-btn" onclick="showPage('goals')">Goals</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ LANDING ═══ -->
+<div id="page-landing" class="canvas-area" style="padding-top:72px;">
+  <div class="canvas-section-title" style="padding-top:0;">Landing Page — 2 layout directions</div>
+
+  <!-- Option A: Hero-first, top nav -->
+  <div class="phone-frame">
+    <div class="phone-label">Option A — Hero scroll</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar">
+        <span class="sk-mono">9:41</span>
+        <span class="sk-mono">●●●</span>
+      </div>
+      <!-- Top nav -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 14px 10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:20px;height:20px;border:2px solid #1a1a18;border-radius:50%;"></div>
+          <span class="sk-label" style="font-weight:700;font-size:14px;">GuitarAI</span>
+        </div>
+        <div class="sk-rect-dark" style="padding:5px 12px;border-radius:20px;">
+          <span class="sk-label" style="color:#f5f3ef;font-size:13px;">Log in</span>
+        </div>
+      </div>
+      <div class="screen-content" style="padding-top:4px;gap:14px;">
+        <!-- Hero -->
+        <div style="text-align:center;padding:16px 8px 10px;">
+          <div style="font-size:11px;letter-spacing:0.12em;font-family:'Space Mono',monospace;color:#e8891a;margin-bottom:8px;">AI GUITAR COACH</div>
+          <div class="sk-label-xl" style="margin-bottom:10px;">Get real feedback<br/>on your playing</div>
+          <div class="sk-label-sm" style="font-size:14px;margin-bottom:16px;">Record yourself. Get instant AI analysis<br/>of your pitch, timing & technique.</div>
+          <div class="sk-rect-accent" style="border-radius:24px;padding:12px 0;text-align:center;">
+            <span class="sk-label" style="font-weight:700;font-size:16px;">Start for free →</span>
+          </div>
+        </div>
+        <hr class="sk-divider"/>
+        <!-- How it works -->
+        <div>
+          <div class="section-badge">how it works</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div class="sk-circle" style="width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                <span class="sk-label" style="font-size:13px;font-weight:700;">1</span>
+              </div>
+              <div><div class="sk-label" style="font-weight:700;">Record or upload</div><div class="sk-label-sm">Any device, any clip</div></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div class="sk-circle" style="width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                <span class="sk-label" style="font-size:13px;font-weight:700;">2</span>
+              </div>
+              <div><div class="sk-label" style="font-weight:700;">AI analyzes it</div><div class="sk-label-sm">Pitch, timing, dynamics</div></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div class="sk-circle" style="width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                <span class="sk-label" style="font-size:13px;font-weight:700;">3</span>
+              </div>
+              <div><div class="sk-label" style="font-weight:700;">Get your score</div><div class="sk-label-sm">Exercises tailored to you</div></div>
+            </div>
+          </div>
+        </div>
+        <hr class="sk-divider"/>
+        <!-- Screenshot placeholder -->
+        <div class="sk-hatch" style="height:100px;display:flex;align-items:center;justify-content:center;">
+          <span class="sk-mono" style="text-align:center;">[ app screenshot / demo gif ]</span>
+        </div>
+        <div class="sk-annotation" style="text-align:center;">↑ drop a real screenshot here</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Fullscreen hero with guitar illustration area -->
+  <div class="phone-frame">
+    <div class="phone-label">Option B — Fullscreen punch</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar">
+        <span class="sk-mono">9:41</span>
+        <span class="sk-mono">●●●</span>
+      </div>
+      <div class="screen-content" style="gap:0;padding:0;">
+        <!-- Dark hero block -->
+        <div style="background:#1a1a18;padding:24px 16px 20px;margin:-2px -2px 0;">
+          <div style="font-size:10px;letter-spacing:0.15em;font-family:'Space Mono',monospace;color:#e8891a;margin-bottom:12px;">● LIVE AI FEEDBACK</div>
+          <div class="sk-label-xl" style="color:#fdfcf9;margin-bottom:10px;">Your personal<br/>guitar coach</div>
+          <!-- Mock waveform in hero -->
+          <div style="margin:14px 0 10px;">
+            <div class="waveform-bars" style="height:32px;opacity:0.6;">
+              <div class="waveform-bar" style="height:30%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:80%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:55%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:100%;background:#e8891a;"></div>
+              <div class="waveform-bar" style="height:70%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:40%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:90%;background:#e8891a;"></div>
+              <div class="waveform-bar" style="height:60%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:45%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:75%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:55%;background:#fdfcf9;"></div>
+              <div class="waveform-bar" style="height:35%;background:#fdfcf9;"></div>
+            </div>
+          </div>
+          <div class="sk-label-sm" style="color:#aaa;font-size:13px;margin-bottom:16px;">Record → get scored → get better</div>
+          <div class="sk-rect-accent" style="border-radius:24px;padding:12px 0;text-align:center;">
+            <span class="sk-label" style="font-weight:700;font-size:16px;">Try it free →</span>
+          </div>
+          <div style="text-align:center;margin-top:10px;">
+            <span class="sk-label" style="color:#666;font-size:13px;">Already have an account? <u>Log in</u></span>
+          </div>
+        </div>
+        <!-- Stats strip -->
+        <div style="display:flex;border-bottom:1.5px solid #eee;">
+          <div style="flex:1;text-align:center;padding:12px 4px;border-right:1.5px solid #eee;">
+            <div class="sk-label" style="font-weight:700;font-size:18px;">2k+</div>
+            <div class="sk-mono" style="font-size:9px;">players</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:12px 4px;border-right:1.5px solid #eee;">
+            <div class="sk-label" style="font-weight:700;font-size:18px;">12k</div>
+            <div class="sk-mono" style="font-size:9px;">sessions</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:12px 4px;">
+            <div class="sk-label" style="font-weight:700;font-size:18px;">4.9★</div>
+            <div class="sk-mono" style="font-size:9px;">avg rating</div>
+          </div>
+        </div>
+        <!-- Feature chips -->
+        <div style="padding:14px 14px 0;">
+          <div class="section-badge">features</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <div class="sk-rect" style="padding:5px 10px;border-radius:16px;"><span class="sk-label" style="font-size:13px;">Pitch detection</span></div>
+            <div class="sk-rect" style="padding:5px 10px;border-radius:16px;"><span class="sk-label" style="font-size:13px;">BPM analysis</span></div>
+            <div class="sk-rect" style="padding:5px 10px;border-radius:16px;"><span class="sk-label" style="font-size:13px;">AI scoring</span></div>
+            <div class="sk-rect" style="padding:5px 10px;border-radius:16px;"><span class="sk-label" style="font-size:13px;">Practice plans</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ AUTH ═══ -->
+<div id="page-auth" class="canvas-area" style="display:none;padding-top:72px;">
+  <div class="canvas-section-title" style="padding-top:0;">Auth — 2 directions</div>
+
+  <!-- Option A: Tab switcher -->
+  <div class="phone-frame">
+    <div class="phone-label">Option A — Tab switcher</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:16px;">
+        <div style="text-align:center;padding:8px 0 4px;">
+          <div style="width:40px;height:40px;border:2.5px solid #1a1a18;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;">
+            <span class="sk-label" style="font-weight:700;">G</span>
+          </div>
+          <div class="sk-label-lg">GuitarAI</div>
+        </div>
+        <!-- Tabs -->
+        <div style="display:flex;border:2px solid #1a1a18;border-radius:8px;overflow:hidden;">
+          <div style="flex:1;text-align:center;padding:8px;background:#1a1a18;">
+            <span class="sk-label" style="color:#fdfcf9;font-weight:700;">Sign up</span>
+          </div>
+          <div style="flex:1;text-align:center;padding:8px;">
+            <span class="sk-label" style="color:#aaa;">Log in</span>
+          </div>
+        </div>
+        <!-- Form -->
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <div class="sk-label-sm" style="margin-bottom:4px;">Email</div>
+            <div class="sk-rect" style="height:38px;padding:0 10px;display:flex;align-items:center;">
+              <span class="sk-label-sm" style="font-size:13px;color:#ccc;">you@example.com</span>
+            </div>
+          </div>
+          <div>
+            <div class="sk-label-sm" style="margin-bottom:4px;">Password</div>
+            <div class="sk-rect" style="height:38px;padding:0 10px;display:flex;align-items:center;">
+              <span class="sk-label-sm" style="font-size:13px;color:#ccc;">••••••••</span>
+            </div>
+          </div>
+        </div>
+        <div class="sk-rect-accent" style="border-radius:24px;padding:12px 0;text-align:center;">
+          <span class="sk-label" style="font-weight:700;font-size:16px;">Create account</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <hr style="flex:1;border:none;border-top:1.5px dashed #ccc;"/>
+          <span class="sk-label-sm">or</span>
+          <hr style="flex:1;border:none;border-top:1.5px dashed #ccc;"/>
+        </div>
+        <div class="sk-rect-fill" style="border-radius:24px;padding:12px 0;text-align:center;">
+          <span class="sk-label" style="font-weight:700;">Continue with Google</span>
+        </div>
+        <div class="sk-annotation" style="text-align:center;">← switch tabs to toggle login/signup</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Single screen, minimal -->
+  <div class="phone-frame">
+    <div class="phone-label">Option B — Full-bleed minimal</div>
+    <div class="phone-body" style="background:#1a1a18;">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono" style="color:#aaa;">9:41</span><span class="sk-mono" style="color:#aaa;">●●●</span></div>
+      <div class="screen-content" style="gap:16px;background:#1a1a18;">
+        <div style="padding:20px 0 8px;">
+          <div style="font-size:10px;letter-spacing:0.15em;font-family:'Space Mono',monospace;color:#e8891a;margin-bottom:10px;">GUITARAI</div>
+          <div class="sk-label-xl" style="color:#fdfcf9;">Welcome back.</div>
+          <div class="sk-label-sm" style="color:#777;margin-top:6px;font-size:14px;">Sign in to continue your practice</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <div class="sk-label-sm" style="margin-bottom:4px;color:#777;">Email</div>
+            <div style="border:1.5px solid #444;border-radius:6px;height:42px;padding:0 12px;display:flex;align-items:center;">
+              <span class="sk-label-sm" style="font-size:13px;color:#555;">you@example.com</span>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span class="sk-label-sm" style="color:#777;">Password</span>
+              <span class="sk-annotation" style="font-size:12px;">Forgot?</span>
+            </div>
+            <div style="border:1.5px solid #444;border-radius:6px;height:42px;padding:0 12px;display:flex;align-items:center;">
+              <span class="sk-label-sm" style="font-size:13px;color:#555;">••••••••</span>
+            </div>
+          </div>
+        </div>
+        <div class="sk-rect-accent" style="border-radius:24px;padding:13px 0;text-align:center;">
+          <span class="sk-label" style="font-weight:700;font-size:16px;">Sign in →</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <hr style="flex:1;border:none;border-top:1.5px solid #333;"/>
+          <span class="sk-label-sm" style="color:#555;">or</span>
+          <hr style="flex:1;border:none;border-top:1.5px solid #333;"/>
+        </div>
+        <div style="border:1.5px solid #444;border-radius:24px;padding:12px 0;text-align:center;">
+          <span class="sk-label" style="color:#fdfcf9;font-weight:700;">Continue with Google</span>
+        </div>
+        <div style="text-align:center;">
+          <span class="sk-label" style="color:#555;font-size:14px;">No account? <u style="color:#e8891a;">Sign up</u></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ DASHBOARD ═══ -->
+<div id="page-dashboard" class="canvas-area" style="display:none;padding-top:72px;">
+  <div class="canvas-section-title" style="padding-top:0;">Dashboard — 2 layout directions</div>
+
+  <!-- Option A: Streak-first, card grid -->
+  <div class="phone-frame">
+    <div class="phone-label">Option A — Streak + cards</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:10px;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div class="sk-label-sm">Good morning,</div>
+            <div class="sk-label-lg">Alex 👋</div>
+          </div>
+          <div class="sk-circle" style="width:34px;height:34px;background:#e8e4dc;"></div>
+        </div>
+
+        <!-- Streak banner -->
+        <div style="background:#1a1a18;border-radius:12px;padding:14px;display:flex;align-items:center;gap:14px;">
+          <div style="text-align:center;">
+            <div style="font-size:28px;font-family:'Caveat',cursive;font-weight:700;color:#e8891a;">7</div>
+            <div style="font-size:10px;font-family:'Space Mono',monospace;color:#777;letter-spacing:0.08em;">DAY STREAK</div>
+          </div>
+          <div style="flex:1;">
+            <!-- Mini calendar dots -->
+            <div style="display:flex;gap:4px;margin-bottom:4px;">
+              <div style="width:22px;height:22px;border-radius:4px;background:#e8891a;"></div>
+              <div style="width:22px;height:22px;border-radius:4px;background:#e8891a;"></div>
+              <div style="width:22px;height:22px;border-radius:4px;background:#e8891a;"></div>
+              <div style="width:22px;height:22px;border-radius:4px;background:#e8891a;"></div>
+              <div style="width:22px;height:22px;border-radius:4px;background:#e8891a;"></div>
+              <div style="width:22px;height:22px;border-radius:4px;background:#e8891a;"></div>
+              <div style="width:22px;height:22px;border-radius:4px;background:#e8891a;border:2px solid #fff;"></div>
+            </div>
+            <div class="sk-annotation">Today is day 7 — don't break it!</div>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div style="display:flex;gap:8px;">
+          <div class="sk-rect-fill" style="flex:1;padding:10px 8px;border-radius:8px;text-align:center;">
+            <div class="sk-label" style="font-weight:700;font-size:22px;">84</div>
+            <div class="sk-mono" style="font-size:9px;">avg score</div>
+          </div>
+          <div class="sk-rect-fill" style="flex:1;padding:10px 8px;border-radius:8px;text-align:center;">
+            <div class="sk-label" style="font-weight:700;font-size:22px;">23</div>
+            <div class="sk-mono" style="font-size:9px;">sessions</div>
+          </div>
+          <div class="sk-rect-fill" style="flex:1;padding:10px 8px;border-radius:8px;text-align:center;">
+            <div class="sk-label" style="font-weight:700;font-size:22px;">4h</div>
+            <div class="sk-mono" style="font-size:9px;">this week</div>
+          </div>
+        </div>
+
+        <!-- Progress chart -->
+        <div>
+          <div class="section-badge">score trend</div>
+          <div class="chart-bar-row" style="height:56px;">
+            <div class="chart-bar" style="height:55%;"></div>
+            <div class="chart-bar" style="height:70%;"></div>
+            <div class="chart-bar" style="height:60%;"></div>
+            <div class="chart-bar" style="height:75%;"></div>
+            <div class="chart-bar" style="height:80%;"></div>
+            <div class="chart-bar" style="height:78%;"></div>
+            <div class="chart-bar highlight" style="height:92%;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding-top:3px;">
+            <span class="sk-mono" style="font-size:8px;">Mon</span>
+            <span class="sk-mono" style="font-size:8px;">Tue</span>
+            <span class="sk-mono" style="font-size:8px;">Wed</span>
+            <span class="sk-mono" style="font-size:8px;">Thu</span>
+            <span class="sk-mono" style="font-size:8px;">Fri</span>
+            <span class="sk-mono" style="font-size:8px;">Sat</span>
+            <span class="sk-mono" style="font-size:8px;color:#e8891a;">Today</span>
+          </div>
+        </div>
+
+        <!-- Recent sessions -->
+        <div>
+          <div class="section-badge">recent sessions</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #ddd;">
+              <div><div class="sk-label" style="font-size:14px;">Pentatonic run</div><div class="sk-mono" style="font-size:9px;">Today · 3m 12s</div></div>
+              <div class="sk-rect-accent" style="padding:3px 8px;border-radius:12px;border:none;background:#e8891a;">
+                <span class="sk-label" style="font-size:13px;font-weight:700;">92</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #ddd;">
+              <div><div class="sk-label" style="font-size:14px;">Barre chord practice</div><div class="sk-mono" style="font-size:9px;">Yesterday · 5m 40s</div></div>
+              <div class="sk-rect-fill" style="padding:3px 8px;border-radius:12px;">
+                <span class="sk-label" style="font-size:13px;font-weight:700;">78</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+              <div><div class="sk-label" style="font-size:14px;">Fingerpicking</div><div class="sk-mono" style="font-size:9px;">Sat · 2m 05s</div></div>
+              <div class="sk-rect-fill" style="padding:3px 8px;border-radius:12px;">
+                <span class="sk-label" style="font-size:13px;font-weight:700;">71</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom nav -->
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon active"></div><span class="nav-label active">Home</span></div>
+        <div class="nav-item"><div class="nav-icon"></div><span class="nav-label">Record</span></div>
+        <div class="nav-item"><div class="nav-icon"></div><span class="nav-label">Goals</span></div>
+        <div class="nav-item"><div class="nav-icon"></div><span class="nav-label">Profile</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Activity journal style -->
+  <div class="phone-frame">
+    <div class="phone-label">Option B — Journal / feed style</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:12px;">
+        <!-- Minimal header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;padding-top:4px;">
+          <div>
+            <div class="sk-mono" style="font-size:9px;letter-spacing:0.12em;">MAY 4 · WEEK 18</div>
+            <div class="sk-label-xl">Practice<br/>Journal</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:36px;font-family:'Caveat',cursive;font-weight:700;color:#e8891a;line-height:1;">7</div>
+            <div class="sk-mono" style="font-size:9px;color:#aaa;">day streak</div>
+          </div>
+        </div>
+
+        <!-- Week heatmap -->
+        <div class="sk-rect-fill" style="padding:10px 12px;border-radius:10px;">
+          <div class="sk-mono" style="font-size:9px;margin-bottom:8px;letter-spacing:0.08em;">THIS WEEK</div>
+          <div style="display:flex;gap:6px;justify-content:space-between;">
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:6px;background:#e8891a;margin-bottom:3px;"></div>
+              <div class="sk-mono" style="font-size:8px;">M</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:6px;background:#e8891a;margin-bottom:3px;"></div>
+              <div class="sk-mono" style="font-size:8px;">T</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:6px;background:#e8891a;margin-bottom:3px;"></div>
+              <div class="sk-mono" style="font-size:8px;">W</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:6px;background:#e8891a;margin-bottom:3px;"></div>
+              <div class="sk-mono" style="font-size:8px;">T</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:6px;background:#e8891a;border:2px solid #1a1a18;margin-bottom:3px;"></div>
+              <div class="sk-mono" style="font-size:8px;color:#e8891a;">F</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:6px;background:#e8e4dc;margin-bottom:3px;"></div>
+              <div class="sk-mono" style="font-size:8px;">S</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="width:28px;height:28px;border-radius:6px;background:#e8e4dc;margin-bottom:3px;"></div>
+              <div class="sk-mono" style="font-size:8px;">S</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feed entries -->
+        <div>
+          <div class="section-badge">session log</div>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <!-- Entry -->
+            <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed #ddd;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+                <div style="width:10px;height:10px;border-radius:50%;border:2px solid #e8891a;background:#e8891a;"></div>
+                <div style="width:2px;flex:1;background:#ddd;"></div>
+              </div>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div class="sk-label" style="font-size:14px;font-weight:700;">Pentatonic run</div>
+                  <div class="sk-label" style="color:#e8891a;font-weight:700;">92</div>
+                </div>
+                <div class="sk-mono" style="font-size:9px;color:#aaa;">Today · 3m 12s</div>
+                <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
+                  <span style="font-size:11px;font-family:'Caveat',cursive;background:#e8e4dc;padding:1px 6px;border-radius:8px;">pitch 94</span>
+                  <span style="font-size:11px;font-family:'Caveat',cursive;background:#e8e4dc;padding:1px 6px;border-radius:8px;">timing 88</span>
+                </div>
+              </div>
+            </div>
+            <!-- Entry 2 -->
+            <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed #ddd;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+                <div style="width:10px;height:10px;border-radius:50%;border:2px solid #ccc;background:#ccc;"></div>
+                <div style="width:2px;flex:1;background:#ddd;"></div>
+              </div>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div class="sk-label" style="font-size:14px;font-weight:700;">Barre chords</div>
+                  <div class="sk-label" style="font-weight:700;">78</div>
+                </div>
+                <div class="sk-mono" style="font-size:9px;color:#aaa;">Yesterday · 5m 40s</div>
+              </div>
+            </div>
+            <!-- Entry 3 -->
+            <div style="display:flex;gap:10px;padding:10px 0;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+                <div style="width:10px;height:10px;border-radius:50%;border:2px solid #ccc;background:#ccc;"></div>
+              </div>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div class="sk-label" style="font-size:14px;font-weight:700;">Fingerpicking</div>
+                  <div class="sk-label" style="font-weight:700;">71</div>
+                </div>
+                <div class="sk-mono" style="font-size:9px;color:#aaa;">Sat · 2m 05s</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Big FAB -->
+      <div style="position:absolute;bottom:16px;right:16px;">
+        <div class="sk-rect-accent" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:24px;font-family:'Caveat',cursive;font-weight:700;">+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ NEW SESSION ═══ -->
+<div id="page-session-new" class="canvas-area" style="display:none;padding-top:72px;">
+  <div class="canvas-section-title" style="padding-top:0;">New Session — 2 layout directions</div>
+
+  <!-- Option A: Upload primary, record secondary -->
+  <div class="phone-frame">
+    <div class="phone-label">Option A — Upload-first</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:12px;">
+        <div style="display:flex;align-items:center;gap:8px;padding-top:4px;">
+          <div style="width:20px;height:20px;border:2px solid #1a1a18;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'Caveat',cursive;">←</div>
+          <div class="sk-label-lg">New Session</div>
+        </div>
+
+        <!-- Upload zone -->
+        <div class="sk-hatch" style="border-radius:14px;padding:28px 16px;text-align:center;border:2.5px dashed #1a1a18;background:rgba(232,137,26,0.04);">
+          <div style="margin-bottom:8px;">
+            <div class="sk-rect" style="width:44px;height:44px;margin:0 auto;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:20px;font-family:'Caveat',cursive;">↑</span>
+            </div>
+          </div>
+          <div class="sk-label" style="font-weight:700;font-size:16px;margin-bottom:4px;">Drop your recording</div>
+          <div class="sk-label-sm" style="font-size:13px;">.mp3 · .wav · .ogg · .m4a</div>
+          <div style="margin-top:12px;">
+            <div class="sk-rect-fill" style="display:inline-block;padding:7px 20px;border-radius:20px;">
+              <span class="sk-label" style="font-size:14px;">Browse files</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;">
+          <hr style="flex:1;border:none;border-top:1.5px dashed #ccc;"/>
+          <span class="sk-label-sm">or record now</span>
+          <hr style="flex:1;border:none;border-top:1.5px dashed #ccc;"/>
+        </div>
+
+        <!-- Record button -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:64px;height:64px;border-radius:50%;border:3px solid #1a1a18;display:flex;align-items:center;justify-content:center;position:relative;">
+            <div style="width:24px;height:24px;border-radius:50%;background:#cc3333;border:2px solid #1a1a18;"></div>
+          </div>
+          <span class="sk-annotation">tap to record</span>
+        </div>
+
+        <hr class="sk-divider"/>
+
+        <!-- Session name field -->
+        <div>
+          <div class="sk-label-sm" style="margin-bottom:4px;">Session name (optional)</div>
+          <div class="sk-rect" style="height:36px;padding:0 10px;display:flex;align-items:center;">
+            <span class="sk-label-sm" style="color:#ccc;font-size:13px;">e.g. Pentatonic practice</span>
+          </div>
+        </div>
+
+        <div class="sk-rect-accent" style="border-radius:24px;padding:13px 0;text-align:center;opacity:0.4;">
+          <span class="sk-label" style="font-weight:700;font-size:15px;">Analyze →</span>
+        </div>
+        <div class="sk-annotation" style="text-align:center;">↑ enabled after audio added</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Recording-first, step flow -->
+  <div class="phone-frame">
+    <div class="phone-label">Option B — Active recording state</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:0;align-items:center;padding:14px 14px 20px;">
+        <!-- Step indicator -->
+        <div style="display:flex;gap:6px;margin-bottom:20px;align-self:stretch;">
+          <div style="flex:1;height:3px;background:#1a1a18;border-radius:2px;"></div>
+          <div style="flex:1;height:3px;background:#ddd;border-radius:2px;"></div>
+          <div style="flex:1;height:3px;background:#ddd;border-radius:2px;"></div>
+        </div>
+
+        <div class="sk-label-sm" style="text-align:center;margin-bottom:6px;font-size:12px;letter-spacing:0.05em;">STEP 1 · RECORD</div>
+        <div class="sk-label-lg" style="text-align:center;margin-bottom:24px;">Play something!</div>
+
+        <!-- Live waveform -->
+        <div style="align-self:stretch;margin-bottom:18px;">
+          <div class="waveform-bars" style="height:60px;align-items:center;">
+            <div class="waveform-bar" style="height:20%;background:#ddd;"></div>
+            <div class="waveform-bar" style="height:60%;background:#ddd;"></div>
+            <div class="waveform-bar" style="height:40%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:90%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:70%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:45%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:80%;background:#cc3333;"></div>
+            <div class="waveform-bar" style="height:60%;background:#cc3333;"></div>
+            <div class="waveform-bar" style="height:95%;background:#cc3333;border:1.5px solid #1a1a18;"></div>
+            <div class="waveform-bar" style="height:25%;background:#ccc;"></div>
+            <div class="waveform-bar" style="height:25%;background:#ccc;"></div>
+            <div class="waveform-bar" style="height:25%;background:#ccc;"></div>
+          </div>
+          <div class="sk-annotation" style="text-align:center;margin-top:4px;">← live waveform as you play</div>
+        </div>
+
+        <!-- Timer -->
+        <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;margin-bottom:6px;letter-spacing:0.05em;">0:24</div>
+        <div class="sk-label-sm" style="margin-bottom:28px;color:#cc3333;font-weight:700;">● Recording…</div>
+
+        <!-- Controls -->
+        <div style="display:flex;gap:24px;align-items:center;margin-bottom:20px;">
+          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:14px;font-family:'Caveat',cursive;color:#aaa;">⏸</span>
+          </div>
+          <div style="width:72px;height:72px;border-radius:50%;border:3px solid #1a1a18;background:#cc3333;display:flex;align-items:center;justify-content:center;position:relative;">
+            <div style="width:20px;height:20px;background:#1a1a18;border-radius:3px;"></div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:14px;font-family:'Caveat',cursive;color:#aaa;">🗑</span>
+          </div>
+        </div>
+
+        <div class="sk-annotation">tap square to stop &amp; review</div>
+
+        <div style="margin-top:20px;align-self:stretch;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <hr style="flex:1;border:none;border-top:1.5px dashed #ccc;"/>
+            <span class="sk-label-sm">upload instead</span>
+            <hr style="flex:1;border:none;border-top:1.5px dashed #ccc;"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SESSION DETAIL ═══ -->
+<div id="page-session-detail" class="canvas-area" style="display:none;padding-top:72px;">
+  <div class="canvas-section-title" style="padding-top:0;">AI Feedback — 2 layout directions</div>
+
+  <!-- Option A: Score ring at top, cards below -->
+  <div class="phone-frame">
+    <div class="phone-label">Option A — Score ring + cards</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:10px;">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:20px;height:20px;border:2px solid #1a1a18;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'Caveat',cursive;">←</div>
+          <div>
+            <div class="sk-label" style="font-weight:700;font-size:15px;">Pentatonic run</div>
+            <div class="sk-mono" style="font-size:9px;">Today · 3m 12s</div>
+          </div>
+        </div>
+
+        <!-- Score ring -->
+        <div style="text-align:center;padding:10px 0 4px;">
+          <div style="position:relative;width:110px;height:110px;margin:0 auto;">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="46" fill="none" stroke="#e8e4dc" stroke-width="10"/>
+              <circle cx="55" cy="55" r="46" fill="none" stroke="#e8891a" stroke-width="10"
+                stroke-dasharray="289" stroke-dashoffset="26" stroke-linecap="round"
+                transform="rotate(-90 55 55)"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+              <div style="font-family:'Caveat',cursive;font-size:28px;font-weight:700;line-height:1;">92</div>
+              <div class="sk-mono" style="font-size:8px;color:#aaa;">/ 100</div>
+            </div>
+          </div>
+          <div class="sk-label" style="font-weight:700;margin-top:6px;font-size:16px;">Excellent session! 🎸</div>
+          <div class="sk-label-sm" style="font-size:13px;margin-top:2px;">Your pitch accuracy was outstanding today</div>
+        </div>
+
+        <!-- Metric pills -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
+          <div class="sk-rect-fill" style="padding:5px 10px;border-radius:20px;">
+            <span class="sk-mono" style="font-size:10px;">Pitch 94/100</span>
+          </div>
+          <div class="sk-rect-fill" style="padding:5px 10px;border-radius:20px;">
+            <span class="sk-mono" style="font-size:10px;">Timing 88/100</span>
+          </div>
+          <div class="sk-rect-fill" style="padding:5px 10px;border-radius:20px;">
+            <span class="sk-mono" style="font-size:10px;">120 BPM</span>
+          </div>
+        </div>
+
+        <!-- Waveform playback -->
+        <div style="border:2px solid #1a1a18;border-radius:8px;padding:8px 10px;">
+          <div class="waveform-bars" style="height:30px;">
+            <div class="waveform-bar" style="height:35%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:70%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:55%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:90%;background:#e8891a;"></div>
+            <div class="waveform-bar" style="height:65%;background:#1a1a18;border:1.5px solid #e8891a;"></div>
+            <div class="waveform-bar" style="height:45%;"></div>
+            <div class="waveform-bar" style="height:80%;"></div>
+            <div class="waveform-bar" style="height:60%;"></div>
+            <div class="waveform-bar" style="height:40%;"></div>
+            <div class="waveform-bar" style="height:75%;"></div>
+            <div class="waveform-bar" style="height:55%;"></div>
+            <div class="waveform-bar" style="height:30%;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <span class="sk-mono" style="font-size:9px;">0:42</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div class="sk-circle" style="width:22px;height:22px;"></div>
+              <div class="sk-rect-dark" style="width:30px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                <span style="color:#fdfcf9;font-size:12px;font-family:'Caveat',cursive;">▶</span>
+              </div>
+              <div class="sk-circle" style="width:22px;height:22px;"></div>
+            </div>
+            <span class="sk-mono" style="font-size:9px;">3:12</span>
+          </div>
+        </div>
+
+        <!-- Feedback cards -->
+        <div>
+          <div class="section-badge">strengths</div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:16px;height:16px;border:2px solid #1a1a18;border-radius:3px;flex-shrink:0;background:#e8891a;display:flex;align-items:center;justify-content:center;margin-top:1px;">
+                <span style="font-size:10px;font-family:'Caveat',cursive;font-weight:700;">✓</span>
+              </div>
+              <span class="sk-label" style="font-size:14px;">Consistent pitch accuracy throughout</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:16px;height:16px;border:2px solid #1a1a18;border-radius:3px;flex-shrink:0;background:#e8891a;display:flex;align-items:center;justify-content:center;margin-top:1px;">
+                <span style="font-size:10px;font-family:'Caveat',cursive;font-weight:700;">✓</span>
+              </div>
+              <span class="sk-label" style="font-size:14px;">Good dynamic control in phrases</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-badge">work on</div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:16px;height:16px;border:2px solid #1a1a18;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;">
+                <span style="font-size:10px;font-family:'Caveat',cursive;color:#aaa;">→</span>
+              </div>
+              <span class="sk-label" style="font-size:14px;">Slight timing drift around 2:10</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-badge">next practice</div>
+          <div class="sk-rect-fill" style="border-radius:8px;padding:10px 12px;">
+            <div class="sk-label" style="font-size:14px;font-weight:700;">Metronome slow-down drill</div>
+            <div class="sk-label-sm" style="font-size:12px;margin-top:2px;">Practice the same run at 80 BPM for 5 minutes focusing on evenness.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Loading state + then reveal -->
+  <div class="phone-frame">
+    <div class="phone-label">Option B — Analysis loading state</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:14px;align-items:center;padding-top:30px;">
+        <!-- Loading animation placeholder -->
+        <div style="width:80px;height:80px;border-radius:50%;border:3px dashed #e8891a;display:flex;align-items:center;justify-content:center;">
+          <div style="width:50px;height:50px;border-radius:50%;background:#e8e4dc;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:22px;font-family:'Caveat',cursive;font-weight:700;">♪</span>
+          </div>
+        </div>
+        <div class="sk-annotation" style="font-size:13px;">← animated while AI processes</div>
+        <div style="text-align:center;">
+          <div class="sk-label-lg">Analyzing your<br/>playing…</div>
+          <div class="sk-label-sm" style="margin-top:8px;font-size:14px;">Detecting pitch, timing &amp; dynamics</div>
+        </div>
+        <!-- Progress steps -->
+        <div style="align-self:stretch;display:flex;flex-direction:column;gap:8px;padding:0 8px;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="width:18px;height:18px;border-radius:50%;background:#e8891a;border:2px solid #1a1a18;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:10px;font-family:'Caveat',cursive;font-weight:700;">✓</span>
+            </div>
+            <span class="sk-label" style="font-size:14px;color:#1a1a18;">Audio uploaded</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="width:18px;height:18px;border-radius:50%;background:#e8891a;border:2px solid #1a1a18;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:10px;font-family:'Caveat',cursive;font-weight:700;">✓</span>
+            </div>
+            <span class="sk-label" style="font-size:14px;color:#1a1a18;">Pitch detected</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="width:18px;height:18px;border-radius:50%;border:2px dashed #e8891a;flex-shrink:0;"></div>
+            <span class="sk-label" style="font-size:14px;color:#aaa;">AI coach reviewing…</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="width:18px;height:18px;border-radius:50%;border:2px dashed #ddd;flex-shrink:0;"></div>
+            <span class="sk-label" style="font-size:14px;color:#ccc;">Building practice plan</span>
+          </div>
+        </div>
+        <hr class="sk-divider" style="align-self:stretch;"/>
+        <div class="sk-label-sm" style="text-align:center;font-size:13px;">Takes about 10–15 seconds</div>
+        <div class="sk-annotation">→ snaps to score screen when done</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ GOALS ═══ -->
+<div id="page-goals" class="canvas-area" style="display:none;padding-top:72px;">
+  <div class="canvas-section-title" style="padding-top:0;">Goals — 2 layout directions</div>
+
+  <!-- Option A: Simple list with progress -->
+  <div class="phone-frame">
+    <div class="phone-label">Option A — Goal list + progress</div>
+    <div class="phone-body">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px;">
+          <div class="sk-label-lg">Goals</div>
+          <div class="sk-rect-accent" style="padding:6px 12px;border-radius:20px;">
+            <span class="sk-label" style="font-size:13px;font-weight:700;">+ Add goal</span>
+          </div>
+        </div>
+
+        <!-- Goal cards -->
+        <div>
+          <div class="section-badge">in progress</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <!-- Goal 1 -->
+            <div class="sk-rect-fill" style="border-radius:10px;padding:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <div class="sk-label" style="font-size:15px;font-weight:700;flex:1;">Learn Wonderwall full song</div>
+                <div class="sk-mono" style="font-size:9px;color:#aaa;white-space:nowrap;margin-left:8px;">Jun 1</div>
+              </div>
+              <!-- Progress bar -->
+              <div style="height:6px;background:#ddd;border-radius:3px;margin-bottom:4px;border:1px solid #ccc;">
+                <div style="height:100%;width:65%;background:#e8891a;border-radius:3px;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span class="sk-annotation">65% complete</span>
+                <span class="sk-mono" style="font-size:9px;">28 days left</span>
+              </div>
+            </div>
+            <!-- Goal 2 -->
+            <div class="sk-rect-fill" style="border-radius:10px;padding:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <div class="sk-label" style="font-size:15px;font-weight:700;flex:1;">Score 90+ avg for a week</div>
+                <div class="sk-mono" style="font-size:9px;color:#aaa;white-space:nowrap;margin-left:8px;">May 11</div>
+              </div>
+              <div style="height:6px;background:#ddd;border-radius:3px;margin-bottom:4px;border:1px solid #ccc;">
+                <div style="height:100%;width:80%;background:#e8891a;border-radius:3px;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span class="sk-annotation">6/7 days done</span>
+                <span class="sk-mono" style="font-size:9px;">1 day left!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-badge">completed</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed #ddd;opacity:0.5;">
+              <div style="width:18px;height:18px;border-radius:3px;background:#1a1a18;flex-shrink:0;"></div>
+              <span class="sk-label" style="font-size:14px;text-decoration:line-through;">Practice 5 days in a row</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 0;opacity:0.5;">
+              <div style="width:18px;height:18px;border-radius:3px;background:#1a1a18;flex-shrink:0;"></div>
+              <span class="sk-label" style="font-size:14px;text-decoration:line-through;">Master F barre chord</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom nav -->
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon"></div><span class="nav-label">Home</span></div>
+        <div class="nav-item"><div class="nav-icon"></div><span class="nav-label">Record</span></div>
+        <div class="nav-item"><div class="nav-icon active"></div><span class="nav-label active">Goals</span></div>
+        <div class="nav-item"><div class="nav-icon"></div><span class="nav-label">Profile</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Card-focused with add modal -->
+  <div class="phone-frame">
+    <div class="phone-label">Option B — Add goal modal state</div>
+    <div class="phone-body" style="position:relative;overflow:hidden;">
+      <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+      <div class="status-bar"><span class="sk-mono">9:41</span><span class="sk-mono">●●●</span></div>
+      <div class="screen-content" style="gap:10px;opacity:0.3;">
+        <div class="sk-label-lg" style="padding-top:4px;">Goals</div>
+        <div class="sk-rect-fill" style="border-radius:10px;padding:12px;height:60px;"></div>
+        <div class="sk-rect-fill" style="border-radius:10px;padding:12px;height:60px;"></div>
+      </div>
+      <!-- Bottom sheet modal overlay -->
+      <div style="position:absolute;bottom:0;left:0;right:0;background:#fdfcf9;border:2.5px solid #1a1a18;border-radius:20px 20px 0 0;padding:16px 16px 24px;">
+        <div style="width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 14px;"></div>
+        <div class="sk-label-lg" style="margin-bottom:14px;">New goal</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <div class="sk-label-sm" style="margin-bottom:4px;">What do you want to achieve?</div>
+            <div class="sk-rect" style="height:36px;padding:0 10px;display:flex;align-items:center;">
+              <span class="sk-label" style="font-size:14px;color:#aaa;">Learn Hotel California</span>
+            </div>
+          </div>
+          <div>
+            <div class="sk-label-sm" style="margin-bottom:4px;">Target date</div>
+            <div class="sk-rect" style="height:36px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;">
+              <span class="sk-label" style="font-size:14px;">June 30, 2026</span>
+              <span class="sk-label-sm">📅</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <div class="sk-rect-fill" style="flex:1;border-radius:20px;padding:11px 0;text-align:center;">
+            <span class="sk-label" style="font-weight:700;">Cancel</span>
+          </div>
+          <div class="sk-rect-accent" style="flex:2;border-radius:20px;padding:11px 0;text-align:center;">
+            <span class="sk-label" style="font-weight:700;">Save goal →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  // Hide all pages
+  document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
+  // Show target
+  document.getElementById('page-' + id).style.display = 'flex';
+  // Update tabs
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
